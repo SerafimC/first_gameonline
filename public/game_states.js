@@ -7,7 +7,7 @@ function State() {
     }
 }
 
-function GameState() {
+module.exports.GameState = function() {
     return {
         player: {},
         players: Array(0),

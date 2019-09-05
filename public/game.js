@@ -1,16 +1,39 @@
 var myGamePiece;
 var mousedown = -1;
+var gamestate
+var ajax = new XMLHttpRequest();
+var url = 'http://localhost:5000/getstate'
+
+ajax.open("POST", url, true);
+ajax.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+ajax.send();
+
+// Cria um evento para receber o retorno.
+ajax.onreadystatechange = function() {
+
+    // Caso o state seja 4 e o http.status for 200, é porque a requisiçõe deu certo.
+    if (ajax.readyState == 4 && ajax.status == 200) {
+
+        gamestate = ajax.responseText;
+        console.log(gamestate)
+            // gamestate.player = myGamePiece;
+            // states.update_state(gamestate);
+    }
+}
+
 var states = new State();
-var gamestate = new GameState();
 
 function startGame() {
     myGamePiece = new component(30, 30, "red", 10, 120);
-
     myGamePiece.speed = 10;
-    gamestate.player = myGamePiece;
-    states.update_state(gamestate);
 
-    myGameArea.start();
+    ajax.open("POST", url, true);
+    ajax.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+    ajax.send();
+
+    ajax.onreadystatechange = function() {
+        // myGameArea.start();
+    }
 }
 
 function genLabyrinth() {
@@ -89,21 +112,33 @@ document.addEventListener('keypress', (event) => {
     if (event.keyCode == '97') {
         myGamePiece.x += myGamePiece.speed * -1;
         update_gamestate();
+        ajax.open("POST", url, true);
+        ajax.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+        ajax.send();
     }
 
     if (event.keyCode == '100') {
         myGamePiece.x += myGamePiece.speed;
         update_gamestate();
+        ajax.open("POST", url, true);
+        ajax.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+        ajax.send();
     }
 
     if (event.keyCode == '119') {
         myGamePiece.y += myGamePiece.speed * -1;
         update_gamestate();
+        ajax.open("POST", url, true);
+        ajax.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+        ajax.send();
     }
 
     if (event.keyCode == '115') {
         myGamePiece.y += myGamePiece.speed;
         update_gamestate();
+        ajax.open("POST", url, true);
+        ajax.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+        ajax.send();
     }
 
 });
