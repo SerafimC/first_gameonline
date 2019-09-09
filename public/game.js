@@ -1,25 +1,9 @@
 var myGamePiece;
 var mousedown = -1;
-var gamestate
+var gamestate = {}
 var ajax = new XMLHttpRequest();
-var url = 'http://localhost:5000/getstate'
-
-ajax.open("POST", url, true);
-ajax.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
-ajax.send();
-
-// Cria um evento para receber o retorno.
-ajax.onreadystatechange = function() {
-
-    // Caso o state seja 4 e o http.status for 200, é porque a requisiçõe deu certo.
-    if (ajax.readyState == 4 && ajax.status == 200) {
-
-        gamestate = ajax.responseText;
-        console.log(gamestate)
-            // gamestate.player = myGamePiece;
-            // states.update_state(gamestate);
-    }
-}
+var geturl = 'http://localhost:5000/getstate'
+var sendurl = 'http://localhost:5000/sendstate'
 
 var states = new State();
 
@@ -27,13 +11,11 @@ function startGame() {
     myGamePiece = new component(30, 30, "red", 10, 120);
     myGamePiece.speed = 10;
 
-    ajax.open("POST", url, true);
-    ajax.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
-    ajax.send();
+    getState(geturl, responseGet);
+    sendState(sendurl, doNothing);
 
-    ajax.onreadystatechange = function() {
-        // myGameArea.start();
-    }
+    myGameArea.start()
+
 }
 
 function genLabyrinth() {
@@ -48,7 +30,7 @@ var myGameArea = {
         this.context = this.canvas.getContext("2d");
         document.body.insertBefore(this.canvas, document.body.childNodes[0]);
         this.frameNo = 0;
-        this.interval = setInterval(updateGameArea, 20);
+        this.interval = setInterval(updateGameArea, 10000);
     },
     clear: function() {
         this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
@@ -56,6 +38,7 @@ var myGameArea = {
 }
 
 function component(width, height, color, x, y, type) {
+    this.id = ''
     this.type = type;
     this.width = width;
     this.height = height;
@@ -97,13 +80,20 @@ function component(width, height, color, x, y, type) {
 }
 
 function updateGameArea() {
-    const current_state = states.state[states.state.length - 1];
+    const current_state = states.state[states.state.length - 1].players;
+    const player = current_state.find((el) => {
+        if (el.id == myGamePiece.id) {
+            return el
+        }
+    });
+
+    console.log(player)
 
     myGameArea.clear();
     myGameArea.frameNo += 1;
 
-    current_state.player.update();
-    // states.update_state(gamestate);
+    myGamePiece = player;
+    myGamePiece.update();
 
 }
 
@@ -111,34 +101,30 @@ document.addEventListener('keypress', (event) => {
 
     if (event.keyCode == '97') {
         myGamePiece.x += myGamePiece.speed * -1;
-        update_gamestate();
-        ajax.open("POST", url, true);
-        ajax.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
-        ajax.send();
+        update_gamestate()
+        sendState(sendurl, doNothing);
+        getState(geturl, responseGet);
     }
 
     if (event.keyCode == '100') {
         myGamePiece.x += myGamePiece.speed;
-        update_gamestate();
-        ajax.open("POST", url, true);
-        ajax.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
-        ajax.send();
+        update_gamestate()
+        sendState(sendurl, doNothing);
+        getState(geturl, responseGet);
     }
 
     if (event.keyCode == '119') {
         myGamePiece.y += myGamePiece.speed * -1;
-        update_gamestate();
-        ajax.open("POST", url, true);
-        ajax.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
-        ajax.send();
+        update_gamestate()
+        sendState(sendurl, doNothing);
+        getState(geturl, responseGet);
     }
 
     if (event.keyCode == '115') {
         myGamePiece.y += myGamePiece.speed;
-        update_gamestate();
-        ajax.open("POST", url, true);
-        ajax.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
-        ajax.send();
+        update_gamestate()
+        sendState(sendurl, doNothing);
+        getState(geturl, responseGet);
     }
 
 });
@@ -146,3 +132,41 @@ document.addEventListener('keypress', (event) => {
 function update_gamestate() {
     states.update_state(gamestate);
 }
+
+function getState(url, cFunction) {
+    var xhttp;
+    xhttp = new XMLHttpRequest();
+    xhttp.onreadystatechange = function() {
+        if (this.readyState == 4 && this.status == 200) {
+            cFunction(this);
+        }
+    };
+    xhttp.open("POST", url, false);
+    xhttp.send();
+}
+
+function responseGet(xhttp) {
+    gamestate = JSON.parse(xhttp.responseText)
+
+    if (myGamePiece.id == '') {
+        myGamePiece.id = 'ply' + gamestate.players.length;
+        gamestate.players.push(myGamePiece)
+    }
+
+    states.update_state(gamestate);
+}
+
+function sendState(url, cFunction) {
+    var xhttp;
+    xhttp = new XMLHttpRequest();
+    xhttp.onreadystatechange = function() {
+        if (this.readyState == 4 && this.status == 200) {
+            cFunction(this);
+        }
+    };
+    xhttp.open("POST", url, false);
+    xhttp.setRequestHeader("Content-type", "application/json");
+    xhttp.send(JSON.stringify(gamestate));
+}
+
+function doNothing() {}

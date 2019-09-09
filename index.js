@@ -10,3 +10,8 @@ app.get('/', function(req, res) {
 app.post('/getstate', function(req, res) {
     res.send(gamestate)
 });
+
+app.post('/sendstate', function(req, res) {
+    gamestate = req.body
+    res.sendStatus(200)
+});

@@ -9,7 +9,6 @@ function State() {
 
 module.exports.GameState = function() {
     return {
-        player: {},
         players: Array(0),
     }
 }

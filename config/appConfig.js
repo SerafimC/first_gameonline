@@ -19,6 +19,7 @@ app.use(allowCors);
 
 app.disable("x-powered-by");
 
+app.use(bodyParser.json());
 app.use('/', router);
 app.use('/static', express.static('public'));
 
