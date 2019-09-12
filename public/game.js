@@ -30,7 +30,7 @@ var myGameArea = {
         this.context = this.canvas.getContext("2d");
         document.body.insertBefore(this.canvas, document.body.childNodes[0]);
         this.frameNo = 0;
-        this.interval = setInterval(updateGameArea, 10000);
+        this.interval = setInterval(updateGameArea, 20);
     },
     clear: function() {
         this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
@@ -80,6 +80,8 @@ function component(width, height, color, x, y, type) {
 }
 
 function updateGameArea() {
+    getState(geturl, responseGet);
+
     const current_state = states.state[states.state.length - 1].players;
     const player = current_state.find((el) => {
         if (el.id == myGamePiece.id) {
@@ -87,13 +89,15 @@ function updateGameArea() {
         }
     });
 
-    console.log(player)
-
     myGameArea.clear();
     myGameArea.frameNo += 1;
 
-    myGamePiece = player;
+    mapGamePiece(myGamePiece, player);
     myGamePiece.update();
+
+    players = mapPlayers(current_state);
+
+    players.forEach((el) => { el.update() });
 
 }
 
@@ -102,35 +106,31 @@ document.addEventListener('keypress', (event) => {
     if (event.keyCode == '97') {
         myGamePiece.x += myGamePiece.speed * -1;
         update_gamestate()
-        sendState(sendurl, doNothing);
-        getState(geturl, responseGet);
     }
 
     if (event.keyCode == '100') {
         myGamePiece.x += myGamePiece.speed;
         update_gamestate()
-        sendState(sendurl, doNothing);
-        getState(geturl, responseGet);
     }
 
     if (event.keyCode == '119') {
         myGamePiece.y += myGamePiece.speed * -1;
         update_gamestate()
-        sendState(sendurl, doNothing);
-        getState(geturl, responseGet);
     }
 
     if (event.keyCode == '115') {
         myGamePiece.y += myGamePiece.speed;
         update_gamestate()
-        sendState(sendurl, doNothing);
-        getState(geturl, responseGet);
     }
 
 });
 
 function update_gamestate() {
+    id = gamestate.players.map((el) => { return el.id }).indexOf(myGamePiece.id);
+    gamestate.players[id] = myGamePiece;
     states.update_state(gamestate);
+    sendState(sendurl, doNothing);
+    getState(geturl, responseGet);
 }
 
 function getState(url, cFunction) {
@@ -170,3 +170,18 @@ function sendState(url, cFunction) {
 }
 
 function doNothing() {}
+
+function mapGamePiece(gamepiece, newData) {
+    gamepiece.width = newData.width;
+    gamepiece.height = newData.height;
+    gamepiece.speed = newData.speed;
+    gamepiece.x = newData.x;
+    gamepiece.y = newData.y;
+}
+
+function mapPlayers(state) {
+
+    players = state.map((el) => { return new component(el.width, el.height, "red", el.x, el.y); })
+
+    return players
+}
