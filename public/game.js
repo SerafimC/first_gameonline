@@ -181,7 +181,9 @@ function mapGamePiece(gamepiece, newData) {
 
 function mapPlayers(state) {
 
-    players = state.map((el) => { return new component(el.width, el.height, "red", el.x, el.y); })
+    players = state.filter(el => el.id != myGamePiece.id).map((el) => {
+        return new component(el.width, el.height, "gray", el.x, el.y);
+    });
 
     return players
 }
