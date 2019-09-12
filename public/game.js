@@ -9,7 +9,7 @@ var states = new State();
 
 function startGame() {
     myGamePiece = new component(30, 30, "red", 10, 120);
-    myGamePiece.speed = 10;
+    myGamePiece.speed = 4;
 
     getState(geturl, responseGet);
     sendState(sendurl, doNothing);
@@ -92,6 +92,7 @@ function updateGameArea() {
     myGameArea.clear();
     myGameArea.frameNo += 1;
 
+
     mapGamePiece(myGamePiece, player);
     myGamePiece.update();
 
@@ -102,25 +103,49 @@ function updateGameArea() {
 }
 
 document.addEventListener('keypress', (event) => {
+    const current_state = states.state[states.state.length - 1].players;
+    const player = current_state.find((el) => {
+        if (el.id == myGamePiece.id) {
+            return el
+        }
+    });
+
+    players = mapPlayers(current_state);
 
     if (event.keyCode == '97') {
         myGamePiece.x += myGamePiece.speed * -1;
-        update_gamestate()
+        if (crash(myGamePiece, players)) {
+            myGamePiece.x -= myGamePiece.speed * -1;
+        } else {
+            update_gamestate()
+        }
     }
 
     if (event.keyCode == '100') {
         myGamePiece.x += myGamePiece.speed;
-        update_gamestate()
+        if (crash(myGamePiece, players)) {
+            myGamePiece.x -= myGamePiece.speed;
+        } else {
+            update_gamestate()
+        }
     }
 
     if (event.keyCode == '119') {
         myGamePiece.y += myGamePiece.speed * -1;
-        update_gamestate()
+        if (crash(myGamePiece, players)) {
+            myGamePiece.y -= myGamePiece.speed * -1;
+        } else {
+            update_gamestate()
+        }
     }
 
     if (event.keyCode == '115') {
         myGamePiece.y += myGamePiece.speed;
-        update_gamestate()
+        if (crash(myGamePiece, players)) {
+            myGamePiece.y -= myGamePiece.speed;
+        } else {
+            update_gamestate()
+        }
     }
 
 });
@@ -186,4 +211,13 @@ function mapPlayers(state) {
     });
 
     return players
+}
+
+function crash(myGamePiece, objects) {
+    for (i = 0; i < objects.length; i += 1) {
+        if (myGamePiece.crashWith(objects[i])) {
+            return true;
+        }
+    }
+    return false;
 }
