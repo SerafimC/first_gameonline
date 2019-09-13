@@ -8,13 +8,24 @@ var sendurl = 'http://localhost:5000/sendstate'
 var states = new State();
 
 function startGame() {
-    myGamePiece = new component(30, 30, "red", 10, 120);
+    myGamePiece = new component(30, 30, "red", 20, 120);
     myGamePiece.speed = 4;
 
     getState(geturl, responseGet);
     sendState(sendurl, doNothing);
 
-    myGameArea.start()
+
+    if (states.state.length > 0) {
+        const current_state = states.state[states.state.length - 1].players;
+
+        players = mapPlayers(current_state);
+
+        players.forEach((el) => { console.log("new component(" + el.width + ", " + el.height + ", 'blue', " + el.x + ", " + el.y + ");") });
+    }
+
+
+    myGameArea.start();
+    createMaze();
 
 }
 
@@ -25,8 +36,8 @@ function genLabyrinth() {
 var myGameArea = {
     canvas: document.createElement("canvas"),
     start: function() {
-        this.canvas.width = 700;
-        this.canvas.height = 500;
+        this.canvas.width = 1000;
+        this.canvas.height = 1000;
         this.context = this.canvas.getContext("2d");
         document.body.insertBefore(this.canvas, document.body.childNodes[0]);
         this.frameNo = 0;
@@ -91,6 +102,7 @@ function updateGameArea() {
 
     myGameArea.clear();
     myGameArea.frameNo += 1;
+    createMaze();
 
 
     mapGamePiece(myGamePiece, player);
@@ -104,12 +116,6 @@ function updateGameArea() {
 
 document.addEventListener('keypress', (event) => {
     const current_state = states.state[states.state.length - 1].players;
-    const player = current_state.find((el) => {
-        if (el.id == myGamePiece.id) {
-            return el
-        }
-    });
-
     players = mapPlayers(current_state);
 
     if (event.keyCode == '97') {
@@ -216,8 +222,79 @@ function mapPlayers(state) {
 function crash(myGamePiece, objects) {
     for (i = 0; i < objects.length; i += 1) {
         if (myGamePiece.crashWith(objects[i])) {
-            return true;
+            return false;
         }
     }
     return false;
+}
+
+function updateMyGamePiece() {
+    console.log('OK')
+    var w = document.getElementById("w").value;
+    var h = document.getElementById("h").value;
+    var s = document.getElementById("s").value;
+
+    myGamePiece.width = w;
+    myGamePiece.height = h;
+
+    update_gamestate();
+}
+
+function createMaze() {
+    new component(1000, 15, 'blue', -2, 0).update();
+    new component(1000, 15, 'blue', -6, 984).update();
+    new component(15, 1000, 'blue', 982, 0).update();
+    new component(15, 1000, 'blue', -2, 12).update();
+    new component(30, 30, 'blue', 10, 180).update();
+    new component(30, 30, 'blue', 10, 72).update();
+    new component(30, 30, 'blue', 762, 956).update();
+    new component(30, 30, 'blue', 890, 956).update();
+    new component(150, 30, 'blue', 34, 180).update();
+    new component(150, 30, 'blue', 38, 72).update();
+    new component(30, 30, 'blue', 226, 72).update();
+    new component(30, 30, 'blue', 222, 180).update();
+    new component(30, 150, 'blue', 154, 208).update();
+    new component(30, 150, 'blue', 222, 204).update();
+    new component(30, 30, 'blue', 226, 44).update();
+    new component(30, 60, 'blue', 158, 20).update();
+    new component(30, 30, 'blue', 158, 8).update();
+    new component(30, 30, 'blue', 290, 180).update();
+    new component(30, 30, 'blue', 354, 180).update();
+    new component(30, 30, 'blue', 418, 180).update();
+    new component(30, 150, 'blue', 290, 204).update();
+    new component(30, 150, 'blue', 354, 204).update();
+    new component(30, 150, 'blue', 418, 204).update();
+    new component(90, 30, 'blue', 154, 348).update();
+    new component(30, 30, 'blue', 222, 348).update();
+    new component(40, 30, 'blue', 278, 352).update();
+    new component(30, 30, 'blue', 290, 352).update();
+    new component(30, 70, 'blue', 154, 376).update();
+    new component(30, 150, 'blue', 354, 296).update();
+    new component(300, 30, 'blue', 82, 416).update();
+    new component(30, 150, 'blue', 418, 348).update();
+    new component(200, 30, 'blue', 186, 480).update();
+    new component(30, 200, 'blue', 82, 436).update();
+    new component(30, 150, 'blue', 146, 480).update();
+    new component(30, 70, 'blue', 354, 508).update();
+    new component(150, 30, 'blue', 82, 664).update();
+    new component(30, 30, 'blue', 50, 672).update();
+    new component(30, 30, 'blue', 54, 664).update();
+    new component(30, 30, 'blue', 50, 664).update();
+    new component(30, 300, 'blue', 50, 688).update();
+    new component(30, 30, 'blue', 122, 912).update();
+    new component(30, 30, 'blue', 130, 728).update();
+    new component(30, 30, 'blue', 122, 920).update();
+    new component(30, 210, 'blue', 122, 728).update();
+    new component(30, 30, 'blue', 170, 480).update();
+    new component(90, 32, 'blue', 6, 604).update();
+    new component(30, 300, 'blue', 354, 576).update();
+    new component(30, 300, 'blue', 418, 496).update();
+    new component(30, 30, 'blue', 386, 684).update();
+    new component(30, 30, 'blue', 270, 664).update();
+    new component(30, 200, 'blue', 270, 692).update();
+    new component(130, 30, 'blue', 158, 728).update();
+    new component(30, 30, 'blue', 418, 832).update();
+    new component(30, 150, 'blue', 418, 840).update();
+    new component(250, 30, 'blue', 134, 920).update();
+    new component(30, 150, 'blue', 270, 532).update();
 }
