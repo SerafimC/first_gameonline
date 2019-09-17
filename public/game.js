@@ -1,21 +1,23 @@
 var myGamePiece;
 var mousedown = -1;
 var gamestate = {}
+var maze = []
 var ajax = new XMLHttpRequest();
 var geturl = 'http://localhost:5000/getstate'
 var sendurl = 'http://localhost:5000/sendstate'
+var devMode = false;
 
 var states = new State();
 
 function startGame() {
-    myGamePiece = new component(30, 30, "red", 20, 120);
+    myGamePiece = new component(20, 20, "red", 20, 120);
     myGamePiece.speed = 4;
 
     getState(geturl, responseGet);
     sendState(sendurl, doNothing);
 
 
-    if (states.state.length > 0) {
+    if (states.state.length > 0 && devMode) {
         const current_state = states.state[states.state.length - 1].players;
 
         players = mapPlayers(current_state);
@@ -23,9 +25,8 @@ function startGame() {
         players.forEach((el) => { console.log("new component(" + el.width + ", " + el.height + ", 'blue', " + el.x + ", " + el.y + ");") });
     }
 
-
-    myGameArea.start();
     createMaze();
+    myGameArea.start();
 
 }
 
@@ -102,7 +103,8 @@ function updateGameArea() {
 
     myGameArea.clear();
     myGameArea.frameNo += 1;
-    createMaze();
+
+    maze.forEach((el) => { el.update() });
 
 
     mapGamePiece(myGamePiece, player);
@@ -120,7 +122,7 @@ document.addEventListener('keypress', (event) => {
 
     if (event.keyCode == '97') {
         myGamePiece.x += myGamePiece.speed * -1;
-        if (crash(myGamePiece, players)) {
+        if (crash(myGamePiece, players) || crash(myGamePiece, maze)) {
             myGamePiece.x -= myGamePiece.speed * -1;
         } else {
             update_gamestate()
@@ -129,7 +131,7 @@ document.addEventListener('keypress', (event) => {
 
     if (event.keyCode == '100') {
         myGamePiece.x += myGamePiece.speed;
-        if (crash(myGamePiece, players)) {
+        if (crash(myGamePiece, players) || crash(myGamePiece, maze)) {
             myGamePiece.x -= myGamePiece.speed;
         } else {
             update_gamestate()
@@ -138,7 +140,7 @@ document.addEventListener('keypress', (event) => {
 
     if (event.keyCode == '119') {
         myGamePiece.y += myGamePiece.speed * -1;
-        if (crash(myGamePiece, players)) {
+        if (crash(myGamePiece, players) || crash(myGamePiece, maze)) {
             myGamePiece.y -= myGamePiece.speed * -1;
         } else {
             update_gamestate()
@@ -147,7 +149,7 @@ document.addEventListener('keypress', (event) => {
 
     if (event.keyCode == '115') {
         myGamePiece.y += myGamePiece.speed;
-        if (crash(myGamePiece, players)) {
+        if (crash(myGamePiece, players) || crash(myGamePiece, maze)) {
             myGamePiece.y -= myGamePiece.speed;
         } else {
             update_gamestate()
@@ -222,7 +224,7 @@ function mapPlayers(state) {
 function crash(myGamePiece, objects) {
     for (i = 0; i < objects.length; i += 1) {
         if (myGamePiece.crashWith(objects[i])) {
-            return false;
+            return true;
         }
     }
     return false;
@@ -241,60 +243,96 @@ function updateMyGamePiece() {
 }
 
 function createMaze() {
-    new component(1000, 15, 'blue', -2, 0).update();
-    new component(1000, 15, 'blue', -6, 984).update();
-    new component(15, 1000, 'blue', 982, 0).update();
-    new component(15, 1000, 'blue', -2, 12).update();
-    new component(30, 30, 'blue', 10, 180).update();
-    new component(30, 30, 'blue', 10, 72).update();
-    new component(30, 30, 'blue', 762, 956).update();
-    new component(30, 30, 'blue', 890, 956).update();
-    new component(150, 30, 'blue', 34, 180).update();
-    new component(150, 30, 'blue', 38, 72).update();
-    new component(30, 30, 'blue', 226, 72).update();
-    new component(30, 30, 'blue', 222, 180).update();
-    new component(30, 150, 'blue', 154, 208).update();
-    new component(30, 150, 'blue', 222, 204).update();
-    new component(30, 30, 'blue', 226, 44).update();
-    new component(30, 60, 'blue', 158, 20).update();
-    new component(30, 30, 'blue', 158, 8).update();
-    new component(30, 30, 'blue', 290, 180).update();
-    new component(30, 30, 'blue', 354, 180).update();
-    new component(30, 30, 'blue', 418, 180).update();
-    new component(30, 150, 'blue', 290, 204).update();
-    new component(30, 150, 'blue', 354, 204).update();
-    new component(30, 150, 'blue', 418, 204).update();
-    new component(90, 30, 'blue', 154, 348).update();
-    new component(30, 30, 'blue', 222, 348).update();
-    new component(40, 30, 'blue', 278, 352).update();
-    new component(30, 30, 'blue', 290, 352).update();
-    new component(30, 70, 'blue', 154, 376).update();
-    new component(30, 150, 'blue', 354, 296).update();
-    new component(300, 30, 'blue', 82, 416).update();
-    new component(30, 150, 'blue', 418, 348).update();
-    new component(200, 30, 'blue', 186, 480).update();
-    new component(30, 200, 'blue', 82, 436).update();
-    new component(30, 150, 'blue', 146, 480).update();
-    new component(30, 70, 'blue', 354, 508).update();
-    new component(150, 30, 'blue', 82, 664).update();
-    new component(30, 30, 'blue', 50, 672).update();
-    new component(30, 30, 'blue', 54, 664).update();
-    new component(30, 30, 'blue', 50, 664).update();
-    new component(30, 300, 'blue', 50, 688).update();
-    new component(30, 30, 'blue', 122, 912).update();
-    new component(30, 30, 'blue', 130, 728).update();
-    new component(30, 30, 'blue', 122, 920).update();
-    new component(30, 210, 'blue', 122, 728).update();
-    new component(30, 30, 'blue', 170, 480).update();
-    new component(90, 32, 'blue', 6, 604).update();
-    new component(30, 300, 'blue', 354, 576).update();
-    new component(30, 300, 'blue', 418, 496).update();
-    new component(30, 30, 'blue', 386, 684).update();
-    new component(30, 30, 'blue', 270, 664).update();
-    new component(30, 200, 'blue', 270, 692).update();
-    new component(130, 30, 'blue', 158, 728).update();
-    new component(30, 30, 'blue', 418, 832).update();
-    new component(30, 150, 'blue', 418, 840).update();
-    new component(250, 30, 'blue', 134, 920).update();
-    new component(30, 150, 'blue', 270, 532).update();
+    maze.push(new component(1000, 15, 'blue', -2, 0));
+    maze.push(new component(1000, 15, 'blue', -6, 984));
+    maze.push(new component(15, 1000, 'blue', 982, 0));
+    maze.push(new component(15, 1000, 'blue', -2, 12));
+    maze.push(new component(30, 30, 'blue', 10, 180));
+    maze.push(new component(30, 30, 'blue', 10, 72));
+    maze.push(new component(30, 30, 'blue', 762, 956));
+    maze.push(new component(30, 30, 'blue', 890, 956));
+    maze.push(new component(150, 30, 'blue', 34, 180));
+    maze.push(new component(150, 30, 'blue', 38, 72));
+    maze.push(new component(30, 30, 'blue', 226, 72));
+    maze.push(new component(30, 30, 'blue', 222, 180));
+    maze.push(new component(30, 150, 'blue', 154, 208));
+    maze.push(new component(30, 150, 'blue', 222, 204));
+    maze.push(new component(30, 30, 'blue', 226, 44));
+    maze.push(new component(30, 60, 'blue', 158, 20));
+    maze.push(new component(30, 30, 'blue', 158, 8));
+    maze.push(new component(30, 30, 'blue', 290, 180));
+    maze.push(new component(30, 30, 'blue', 354, 180));
+    maze.push(new component(30, 30, 'blue', 418, 180));
+    maze.push(new component(30, 150, 'blue', 290, 204));
+    maze.push(new component(30, 150, 'blue', 354, 204));
+    maze.push(new component(30, 150, 'blue', 418, 204));
+    maze.push(new component(90, 30, 'blue', 154, 348));
+    maze.push(new component(30, 30, 'blue', 222, 348));
+    maze.push(new component(40, 30, 'blue', 278, 352));
+    maze.push(new component(30, 30, 'blue', 290, 352));
+    maze.push(new component(30, 70, 'blue', 154, 376));
+    maze.push(new component(30, 150, 'blue', 354, 296));
+    maze.push(new component(300, 30, 'blue', 82, 416));
+    maze.push(new component(30, 150, 'blue', 418, 348));
+    maze.push(new component(200, 30, 'blue', 186, 480));
+    maze.push(new component(30, 200, 'blue', 82, 436));
+    maze.push(new component(30, 150, 'blue', 146, 480));
+    maze.push(new component(30, 70, 'blue', 354, 508));
+    maze.push(new component(150, 30, 'blue', 82, 664));
+    maze.push(new component(30, 30, 'blue', 50, 672));
+    maze.push(new component(30, 30, 'blue', 54, 664));
+    maze.push(new component(30, 30, 'blue', 50, 664));
+    maze.push(new component(30, 300, 'blue', 50, 688));
+    maze.push(new component(30, 30, 'blue', 122, 912));
+    maze.push(new component(30, 30, 'blue', 130, 728));
+    maze.push(new component(30, 30, 'blue', 122, 920));
+    maze.push(new component(30, 210, 'blue', 122, 728));
+    maze.push(new component(30, 30, 'blue', 170, 480));
+    maze.push(new component(90, 32, 'blue', 6, 604));
+    maze.push(new component(30, 300, 'blue', 354, 576));
+    maze.push(new component(30, 300, 'blue', 418, 496));
+    maze.push(new component(30, 30, 'blue', 386, 684));
+    maze.push(new component(30, 30, 'blue', 270, 664));
+    maze.push(new component(30, 200, 'blue', 270, 692));
+    maze.push(new component(130, 30, 'blue', 158, 728));
+    maze.push(new component(30, 30, 'blue', 418, 832));
+    maze.push(new component(30, 150, 'blue', 418, 840));
+    maze.push(new component(250, 30, 'blue', 134, 920));
+    maze.push(new component(30, 150, 'blue', 270, 532));
+    maze.push(new component(500, 30, 'blue', 228, 44));
+    maze.push(new component(437, 30, 'blue', 292, 104));
+    maze.push(new component(30, 30, 'blue', 696, 16));
+    maze.push(new component(30, 30, 'blue', 696, 12));
+    maze.push(new component(30, 200, 'blue', 484, 128));
+    maze.push(new component(100, 30, 'blue', 728, 44));
+    maze.push(new component(150, 30, 'blue', 868, 44));
+    maze.push(new component(170, 30, 'blue', 764, 104));
+    maze.push(new component(30, 150, 'blue', 832, 120));
+    maze.push(new component(170, 30, 'blue', 764, 308));
+    maze.push(new component(30, 70, 'blue', 904, 120));
+    maze.push(new component(30, 100, 'blue', 904, 224));
+    maze.push(new component(200, 30, 'blue', 632, 172));
+    maze.push(new component(30, 30, 'blue', 560, 120));
+    maze.push(new component(30, 150, 'blue', 560, 104));
+    maze.push(new component(30, 100, 'blue', 632, 188));
+    maze.push(new component(150, 30, 'blue', 512, 288));
+    maze.push(new component(30, 150, 'blue', 736, 244));
+    maze.push(new component(250, 30, 'blue', 488, 364));
+    maze.push(new component(70, 30, 'blue', 444, 300));
+    maze.push(new component(30, 630, 'blue', 488, 376));
+    maze.push(new component(430, 30, 'blue', 556, 432));
+    maze.push(new component(150, 30, 'blue', 832, 380));
+    maze.push(new component(420, 30, 'blue', 516, 500));
+    maze.push(new component(200, 30, 'blue', 556, 568));
+    maze.push(new component(200, 30, 'blue', 792, 568));
+    maze.push(new component(420, 30, 'blue', 516, 644));
+    maze.push(new component(30, 60, 'blue', 580, 588));
+    maze.push(new component(150, 30, 'blue', 556, 720));
+    maze.push(new component(100, 30, 'blue', 744, 720));
+    maze.push(new component(100, 30, 'blue', 884, 720));
+    maze.push(new component(430, 30, 'blue', 560, 788));
+    maze.push(new component(30, 60, 'blue', 756, 660));
+    maze.push(new component(30, 60, 'blue', 600, 736));
+    maze.push(new component(30, 130, 'blue', 560, 808));
+    maze.push(new component(30, 130, 'blue', 624, 860));
 }
