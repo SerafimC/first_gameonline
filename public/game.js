@@ -25,7 +25,7 @@ function startGame() {
         players.forEach((el) => { console.log("new component(" + el.width + ", " + el.height + ", 'blue', " + el.x + ", " + el.y + ");") });
     }
 
-    createMaze2();
+    createMaze();
     myGameArea.start();
 
 }
