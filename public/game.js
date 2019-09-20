@@ -27,7 +27,6 @@ function startGame() {
 
     createMaze();
     myGameArea.start();
-
 }
 
 function genLabyrinth() {
@@ -51,10 +50,12 @@ var myGameArea = {
 
 function component(width, height, color, x, y, type) {
     this.id = ''
+    this.safe = true;
     this.type = type;
     this.width = width;
     this.height = height;
     this.speed = 0;
+    this.inativity = 0;
     this.x = x;
     this.y = y;
     this.update = function() {
@@ -87,6 +88,17 @@ function component(width, height, color, x, y, type) {
         if ((mybottom < othertop) || (mytop > otherbottom) || (myright < otherleft) || (myleft > otherright)) {
             crash = false;
         }
+        // teste se está no ponto inicial não da conflito
+        if(((mybottom-21) >= 100) && ((mytop+21) <= 180) && ((myright-21) >= 13) && ((myleft-20) <= 83)){
+            crash = false;
+        }
+        // teste se está na safe-zone
+        if(((mybottom) > 100) && ((mytop) < 180) && ((myright) > 12) && ((myleft) < 80)){
+            this.safe = true;
+        }else{
+            this.safe = false;
+        }
+       
         return crash;
     }
 }
@@ -106,7 +118,6 @@ function updateGameArea() {
 
     maze.forEach((el) => { el.update() });
 
-
     mapGamePiece(myGamePiece, player);
     myGamePiece.update();
 
@@ -114,11 +125,23 @@ function updateGameArea() {
 
     players.forEach((el) => { el.update() });
 
+    
+    // se ficar inativo por 1000 laços desconecta 
+    if(myGamePiece.inativity > 2000){
+        removeMe("Removido por inatividade.");
+    }
+    
+    myGamePiece.inativity += 1;  
 }
 
 document.addEventListener('keypress', (event) => {
     const current_state = states.state[states.state.length - 1].players;
     players = mapPlayers(current_state);
+    if(myGamePiece.safe)
+        console.log("safe-zone");
+    else
+        console.log("unsafe-zone");
+    myGamePiece.inativity = 0;
 
     if (event.keyCode == '97') {
         myGamePiece.x += myGamePiece.speed * -1;
@@ -164,6 +187,7 @@ function update_gamestate() {
     states.update_state(gamestate);
     sendState(sendurl, doNothing);
     getState(geturl, responseGet);
+    
 }
 
 function getState(url, cFunction) {
@@ -219,6 +243,21 @@ function mapPlayers(state) {
     });
 
     return players
+}
+function removeMe(motivo){
+    getState(geturl, responseGet);
+    const current_state = states.state[states.state.length - 1];
+    current_state.players.splice(myGamePiece, 1);
+    states.update_state(current_state);
+    sendState(sendurl, doNothing);
+    getState(geturl, responseGet);
+    
+    clearInterval(myGameArea.interval);
+    myGameArea.clear();
+    myGameArea.frameNo += 1;
+
+    maze.forEach((el) => { el.update() });
+    alert(motivo);
 }
 
 function crash(myGamePiece, objects) {
@@ -335,6 +374,7 @@ function createMaze() {
     maze.push(new component(30, 60, 'blue', 600, 736));
     maze.push(new component(30, 130, 'blue', 560, 808));
     maze.push(new component(30, 130, 'blue', 624, 860));
+    maze.push(new component(70, 80, "green", 13, 100));
 }
 function createMaze2() {
     new component(1000, 15, 'blue', -2, 0).update();
