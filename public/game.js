@@ -3,8 +3,10 @@ var mousedown = -1;
 var gamestate = {}
 var maze = []
 var ajax = new XMLHttpRequest();
-var geturl = 'http://localhost:5000/getstate'
-var sendurl = 'http://localhost:5000/sendstate'
+var origin = '5000'
+var destiny = '5000'
+var geturl = 'http://localhost:' + origin + '/getstate'
+var sendurl = 'http://localhost:' + destiny + '/sendstate'
 var devMode = false;
 
 var states = new State();
@@ -50,6 +52,8 @@ var myGameArea = {
 
 function component(width, height, color, x, y, type) {
     this.id = ''
+    this.port = ''
+    this.lastUpdate = ''
     this.safe = true;
     this.type = type;
     this.width = width;
@@ -89,16 +93,16 @@ function component(width, height, color, x, y, type) {
             crash = false;
         }
         // teste se está no ponto inicial não da conflito
-        if(((mybottom-21) >= 100) && ((mytop+21) <= 180) && ((myright-21) >= 13) && ((myleft-20) <= 83)){
+        if (((mybottom - 21) >= 100) && ((mytop + 21) <= 180) && ((myright - 21) >= 13) && ((myleft - 20) <= 83)) {
             crash = false;
         }
         // teste se está na safe-zone
-        if(((mybottom) > 100) && ((mytop) < 180) && ((myright) > 12) && ((myleft) < 80)){
+        if (((mybottom) > 100) && ((mytop) < 180) && ((myright) > 12) && ((myleft) < 80)) {
             this.safe = true;
-        }else{
+        } else {
             this.safe = false;
         }
-       
+
         return crash;
     }
 }
@@ -125,19 +129,19 @@ function updateGameArea() {
 
     players.forEach((el) => { el.update() });
 
-    
+
     // se ficar inativo por 1000 laços desconecta 
-    if(myGamePiece.inativity > 2000){
-        removeMe("Removido por inatividade.");
+    if (myGamePiece.inativity > 2000) {
+        // removeMe("Removido por inatividade.");
     }
-    
-    myGamePiece.inativity += 1;  
+
+    myGamePiece.inativity += 1;
 }
 
 document.addEventListener('keypress', (event) => {
     const current_state = states.state[states.state.length - 1].players;
     players = mapPlayers(current_state);
-    if(myGamePiece.safe)
+    if (myGamePiece.safe)
         console.log("safe-zone");
     else
         console.log("unsafe-zone");
@@ -187,7 +191,7 @@ function update_gamestate() {
     states.update_state(gamestate);
     sendState(sendurl, doNothing);
     getState(geturl, responseGet);
-    
+
 }
 
 function getState(url, cFunction) {
@@ -207,6 +211,7 @@ function responseGet(xhttp) {
 
     if (myGamePiece.id == '') {
         myGamePiece.id = 'ply' + gamestate.players.length;
+        myGamePiece.port = '500' + gamestate.players.length;
         gamestate.players.push(myGamePiece)
     }
 
@@ -244,14 +249,15 @@ function mapPlayers(state) {
 
     return players
 }
-function removeMe(motivo){
+
+function removeMe(motivo) {
     getState(geturl, responseGet);
     const current_state = states.state[states.state.length - 1];
     current_state.players.splice(myGamePiece, 1);
     states.update_state(current_state);
     sendState(sendurl, doNothing);
     getState(geturl, responseGet);
-    
+
     clearInterval(myGameArea.interval);
     myGameArea.clear();
     myGameArea.frameNo += 1;
@@ -375,111 +381,4 @@ function createMaze() {
     maze.push(new component(30, 130, 'blue', 560, 808));
     maze.push(new component(30, 130, 'blue', 624, 860));
     maze.push(new component(70, 80, "green", 13, 100));
-}
-function createMaze2() {
-    new component(1000, 15, 'blue', -2, 0).update();
-    new component(1000, 15, 'blue', -6, 984).update();
-    new component(15, 1000, 'blue', 982, 0).update();
-    new component(15, 1000, 'blue', -2, 12).update();
-    new component(30, 30, 'blue', 10, 180).update();
-    new component(30, 30, 'blue', 10, 72).update();
-    new component(30, 30, 'blue', 762, 956).update();
-    new component(30, 30, 'blue', 890, 956).update();
-    new component(150, 30, 'blue', 34, 180).update();
-    new component(150, 30, 'blue', 38, 72).update();
-    new component(30, 30, 'blue', 226, 72).update();
-    new component(30, 30, 'blue', 222, 180).update();
-    new component(30, 150, 'blue', 154, 208).update();
-    new component(30, 150, 'blue', 222, 204).update();
-    new component(30, 30, 'blue', 226, 44).update();
-    new component(30, 60, 'blue', 158, 20).update();
-    new component(30, 30, 'blue', 158, 8).update();
-    new component(30, 30, 'blue', 290, 180).update();
-    new component(30, 30, 'blue', 354, 180).update();
-    new component(30, 30, 'blue', 418, 180).update();
-    new component(30, 150, 'blue', 290, 204).update();
-    new component(30, 150, 'blue', 354, 204).update();
-    new component(30, 150, 'blue', 418, 204).update();
-    new component(90, 30, 'blue', 154, 348).update();
-    new component(30, 30, 'blue', 222, 348).update();
-    new component(40, 30, 'blue', 278, 352).update();
-    new component(30, 30, 'blue', 290, 352).update();
-    new component(30, 70, 'blue', 154, 376).update();
-    new component(30, 150, 'blue', 354, 296).update();
-    new component(300, 30, 'blue', 82, 416).update();
-    new component(30, 150, 'blue', 418, 348).update();
-    new component(200, 30, 'blue', 186, 480).update();
-    new component(30, 200, 'blue', 82, 436).update();
-    new component(30, 150, 'blue', 146, 480).update();
-    new component(30, 70, 'blue', 354, 508).update();
-    new component(150, 30, 'blue', 82, 664).update();
-    new component(30, 30, 'blue', 50, 672).update();
-    new component(30, 30, 'blue', 54, 664).update();
-    new component(30, 30, 'blue', 50, 664).update();
-    new component(30, 300, 'blue', 50, 688).update();
-    new component(30, 30, 'blue', 122, 912).update();
-    new component(30, 30, 'blue', 130, 728).update();
-    new component(30, 30, 'blue', 122, 920).update();
-    new component(30, 210, 'blue', 122, 728).update();
-    new component(30, 30, 'blue', 170, 480).update();
-    new component(90, 32, 'blue', 6, 604).update();
-    new component(30, 300, 'blue', 354, 576).update();
-    new component(30, 300, 'blue', 418, 496).update();
-    new component(30, 30, 'blue', 386, 684).update();
-    new component(30, 30, 'blue', 270, 664).update();
-    new component(30, 200, 'blue', 270, 692).update();
-    new component(130, 30, 'blue', 158, 728).update();
-    new component(30, 30, 'blue', 418, 832).update();
-    new component(30, 150, 'blue', 418, 840).update();
-    new component(250, 30, 'blue', 134, 920).update();
-    new component(30, 150, 'blue', 270, 532).update();
-    new component(300, 30, 'blue', 292, 104).update();
-    new component(100, 30, 'blue', 292, 44).update();
-    new component(30, 100, 'blue', 424, 16).update();
-    new component(200, 30, 'blue', 488, 44).update();
-    new component(120, 30, 'blue', 632, 104).update();
-    new component(30, 90, 'blue', 724, 44).update();
-    new component(200, 30, 'blue', 744, 104).update();
-    new component(30, 50, 'blue', 788, 16).update();
-    new component(30, 60, 'blue', 856, 52).update();
-    new component(50, 30, 'blue', 932, 44).update();
-    new component(100, 30, 'blue', 448, 180).update();
-    new component(100, 30, 'blue', 600, 180).update();
-    new component(100, 30, 'blue', 756, 180).update();
-    new component(100, 30, 'blue', 900, 180).update();
-    new component(30, 100, 'blue', 488, 252).update();
-    new component(50, 30, 'blue', 516, 320).update();
-    new component(100, 30, 'blue', 569, 248).update();
-    new component(30, 150, 'blue', 668, 208).update();
-    new component(30, 200, 'blue', 604, 276).update();
-    new component(30, 580, 'blue', 668, 404).update();
-    new component(120, 30, 'blue', 448, 384).update();
-    new component(120, 30, 'blue', 488, 448).update();
-    new component(30, 100, 'blue', 488, 476).update();
-    new component(30, 200, 'blue', 488, 748).update();
-    new component(105, 30, 'blue', 516, 920).update();
-    new component(30, 200, 'blue', 600, 748).update();
-    new component(190, 30, 'blue', 484, 668).update();
-    new component(100, 50, 'blue', 416, 748).update();
-    new component(30, 60, 'blue', 484, 696).update();
-    new component(15, 180, 'blue', 552, 696).update();
-    new component(150, 30, 'blue', 488, 600).update();
-    new component(30, 30, 'blue', 488, 572).update();
-    new component(150, 30, 'blue', 548, 528).update();
-    new component(300, 30, 'blue', 692, 328).update();
-    new component(30, 100, 'blue', 756, 192).update();
-    new component(150, 40, 'blue', 788, 252).update();
-    
-
-    new component(30, 585, 'blue', 736, 328).update();
-    new component(30, 600, 'blue', 808, 396).update();
-    new component(100, 30, 'blue', 884, 396).update();
-    new component(30, 500, 'blue', 884, 396).update();
-
-
-    // partida
-    new component(30, 30, 'red', 20, 120).update();
-    // destino
-    new component(30, 30, 'green', 936, 444).update();
-  
 }
