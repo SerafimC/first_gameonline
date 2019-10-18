@@ -2,8 +2,7 @@
 //        PACKAGES DEFINITION
 //=======================================
 const bodyParser = require("body-parser");
-const express = require('express')
-const port = process.env.PORT || 5000
+const express = require('express');
 const router = express.Router();
 const app = module.exports = express();
 //=======================================
@@ -20,8 +19,7 @@ app.use(allowCors);
 app.disable("x-powered-by");
 
 app.use(bodyParser.json());
+
 app.use('/', router);
 app.use('/static', express.static('public'));
 
-const server = app.listen(port);
-console.log('Server running on port ' + port);

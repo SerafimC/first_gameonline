@@ -1,36 +1,41 @@
 var myGamePiece;
 var mousedown = -1;
-var gamestate = {}
+var gameServer = {}
 var maze = []
-var ajax = new XMLHttpRequest();
-var geturl = 'http://localhost:5000/getstate'
-var sendurl = 'http://localhost:5000/sendstate'
+var port;
+var geturl;
+var sendurl;
+var updateurl;
+var sendStateUrl;
 var devMode = false;
 
-var states = new State();
+var server = new Server();
 
-function startGame() {
-    myGamePiece = new component(20, 20, "red", 20, 120);
-    myGamePiece.speed = 4;
-
-    getState(geturl, responseGet);
-    sendState(sendurl, doNothing);
-
-
-    if (states.state.length > 0 && devMode) {
-        const current_state = states.state[states.state.length - 1].players;
-
-        players = mapPlayers(current_state);
-
-        players.forEach((el) => { console.log("new component(" + el.width + ", " + el.height + ", 'blue', " + el.x + ", " + el.y + ");") });
+function printServer(server){
+    console.log(" ");
+    console.log("------ SERVER STATUS --------");
+    console.log("Others  : " + JSON.stringify(server.others));
+    console.log("Players Online : " + server.players.length);
+    if(server.players!=null)
+    {
+        server.players.forEach((player) => { 
+            console.log("------ ----------- --------");
+            console.log(player.type + " : " + player.id) 
+            console.log("------ estados player --------");
+            player.states.forEach((el) => { 
+                console.log("     " + el.id + " -> " + el.action + " - " + " x: "+el.x + " y: "+el.y + " heigth: "+el.height+ " width: "+el.width);
+            });
+        });
     }
-
-    createMaze();
-    myGameArea.start();
+    console.log("------ ----------- --------");
 }
-
-function genLabyrinth() {
-    new component(10, 100, "blue", 100, 0).update();
+function printPlayer(player){
+    console.log("------ ----------- --------");
+            console.log(player.type + " : " + player.id) 
+            console.log("------ estados player --------");
+            player.states.forEach((el) => { 
+                console.log("     " + el.id + " -> " + el.action + " - " + " x: "+el.x + " y: "+el.y + " heigth: "+el.height+ " width: "+el.width);
+            });
 }
 
 var myGameArea = {
@@ -47,6 +52,66 @@ var myGameArea = {
         this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
     }
 }
+function startGame() {
+    port = window.location.port;
+    geturl = 'http://localhost:'+port+'/getstate';
+    sendurl = 'http://localhost:'+port+'/sendstate';
+    updateurl = 'http://localhost:'+port+'/updateplayer';
+    sendStateUrl = 'http://localhost:'+port+'/sendmystate';
+
+    // cria novo player
+    myGamePiece = new Player(20, 20, "red", 20, 120);
+            
+    // envia status do player novo
+    sendState(sendStateUrl, responseGet, myGamePiece);
+
+    // cria o labirinto
+    createMaze();
+    myGameArea.start();
+}
+
+function genLabyrinth() {
+    new component(10, 100, "blue", 100, 0).update();
+}
+
+function updatePlayer(obj){
+    ctx = myGameArea.context;
+    if(obj.id != myGamePiece.id)
+        obj.color = "black";
+    if (obj.type == "text") {
+        ctx.font = obj.width + " " + obj.height;
+        ctx.fillStyle = obj.color;
+        ctx.fillText(obj.text, obj.x, obj.y);
+    } else {
+        ctx.fillStyle = obj.color;
+        ctx.fillRect(obj.x, obj.y, obj.width, obj.height);
+    }
+}
+function crashPlayer(otherobj){
+    var myleft = myGamePiece.x;
+        var myright = myGamePiece.x + (myGamePiece.width);
+        var mytop = myGamePiece.y;
+        var mybottom = myGamePiece.y + (myGamePiece.height);
+        var otherleft = otherobj.x;
+        var otherright = otherobj.x + (otherobj.width);
+        var othertop = otherobj.y;
+        var otherbottom = otherobj.y + (otherobj.height);
+        var crash = true;
+        if ((mybottom < othertop) || (mytop > otherbottom) || (myright < otherleft) || (myleft > otherright)) {
+            crash = false;
+        }
+        // teste se está no ponto inicial não da conflito
+        if(((mybottom-21) >= 100) && ((mytop+21) <= 180) && ((myright-21) >= 13) && ((myleft-20) <= 83)){
+            crash = false;
+        }
+        // teste se está na safe-zone
+        if(((mybottom) > 100) && ((mytop) < 180) && ((myright) > 12) && ((myleft) < 80)){
+            myGamePiece.safe = true;
+        }else{
+            myGamePiece.safe = false;
+        }
+        return crash;
+}
 
 function component(width, height, color, x, y, type) {
     this.id = ''
@@ -56,6 +121,9 @@ function component(width, height, color, x, y, type) {
     this.height = height;
     this.speed = 0;
     this.inativity = 0;
+    this.state_id = 0;
+    this.color = color;
+    this.removed = false;
     this.x = x;
     this.y = y;
     this.update = function() {
@@ -104,49 +172,47 @@ function component(width, height, color, x, y, type) {
 }
 
 function updateGameArea() {
-    getState(geturl, responseGet);
+    getState(geturl, responseGet); 
 
-    const current_state = states.state[states.state.length - 1].players;
-    const player = current_state.find((el) => {
-        if (el.id == myGamePiece.id) {
-            return el
-        }
-    });
+    //printServer(server);
 
     myGameArea.clear();
     myGameArea.frameNo += 1;
 
     maze.forEach((el) => { el.update() });
-
-    mapGamePiece(myGamePiece, player);
-    myGamePiece.update();
-
-    players = mapPlayers(current_state);
-
-    players.forEach((el) => { el.update() });
-
     
-    // se ficar inativo por 1000 laços desconecta 
-    if(myGamePiece.inativity > 2000){
-        removeMe("Removido por inatividade.");
+    id = server.players.map((el) => { return el.id }).indexOf(myGamePiece.id);
+
+    if(id != -1){
+        const player = server.players[id];        
+    
+        mapGamePiece(myGamePiece, player);
+        updatePlayer(myGamePiece);
+    
+        server.players.forEach((el) => { updatePlayer(el) });
+    
+        // se ficar inativo por 1000 laços desconecta 
+        if(myGamePiece.inativity > 2000){
+            removeMe("Removido por inatividade.");
+        }
     }
-    
-    myGamePiece.inativity += 1;  
+
+    //myGamePiece.inativity += 1;
+    //console.log("myInativity: " + myGamePiece.inativity);
+    sendState(updateurl, responseGet, myGamePiece); 
 }
 
 document.addEventListener('keypress', (event) => {
-    const current_state = states.state[states.state.length - 1].players;
-    players = mapPlayers(current_state);
-    if(myGamePiece.safe)
-        console.log("safe-zone");
-    else
-        console.log("unsafe-zone");
+    //if(myGamePiece.safe)
+    //    console.log("safe-zone");
+    //else
+    //    console.log("unsafe-zone");
     myGamePiece.inativity = 0;
 
     if (event.keyCode == '97') {
         myGamePiece.x += myGamePiece.speed * -1;
-        if (crash(myGamePiece, players) || crash(myGamePiece, maze)) {
-            myGamePiece.x -= myGamePiece.speed * -1;
+        if (crashPlayer(server.players) || crashPlayer(maze)) {
+           myGamePiece.x -= myGamePiece.speed * -1;
         } else {
             update_gamestate()
         }
@@ -154,26 +220,26 @@ document.addEventListener('keypress', (event) => {
 
     if (event.keyCode == '100') {
         myGamePiece.x += myGamePiece.speed;
-        if (crash(myGamePiece, players) || crash(myGamePiece, maze)) {
-            myGamePiece.x -= myGamePiece.speed;
+        if (crashPlayer(server.players) || crashPlayer(maze)) {
+           myGamePiece.x -= myGamePiece.speed;
         } else {
             update_gamestate()
         }
     }
 
     if (event.keyCode == '119') {
-        myGamePiece.y += myGamePiece.speed * -1;
-        if (crash(myGamePiece, players) || crash(myGamePiece, maze)) {
-            myGamePiece.y -= myGamePiece.speed * -1;
-        } else {
+       myGamePiece.y += myGamePiece.speed * -1;
+       if (crashPlayer(server.players) || crashPlayer(maze)) {
+           myGamePiece.y -= myGamePiece.speed * -1;
+       } else {
             update_gamestate()
-        }
+       }
     }
 
     if (event.keyCode == '115') {
         myGamePiece.y += myGamePiece.speed;
-        if (crash(myGamePiece, players) || crash(myGamePiece, maze)) {
-            myGamePiece.y -= myGamePiece.speed;
+        if (crashPlayer(server.players) || crashPlayer(maze)) {
+           myGamePiece.y -= myGamePiece.speed;
         } else {
             update_gamestate()
         }
@@ -182,12 +248,27 @@ document.addEventListener('keypress', (event) => {
 });
 
 function update_gamestate() {
-    id = gamestate.players.map((el) => { return el.id }).indexOf(myGamePiece.id);
-    gamestate.players[id] = myGamePiece;
-    states.update_state(gamestate);
-    sendState(sendurl, doNothing);
-    getState(geturl, responseGet);
-    
+    var state = new State((myGamePiece.state_id+1), "UPDATE", myGamePiece);
+    myGamePiece.states.push(state);
+    myGamePiece.state_id++;
+
+    id = server.players.map((el) => { return el.id }).indexOf(myGamePiece.id);
+    server.players[id] = myGamePiece;
+
+    sendState(sendStateUrl, responseGet, myGamePiece);
+    //server.merge_states(server.players);        
+}
+function sendState(url, cFunction, obj) {
+    var xhttp;
+    xhttp = new XMLHttpRequest();
+    xhttp.onreadystatechange = function() {
+        if (this.readyState == 4 && this.status == 200) {
+            cFunction(this);
+        }
+    };
+    xhttp.open("POST", url, false);
+    xhttp.setRequestHeader("Content-Type", "application/json");
+    xhttp.send(JSON.stringify(obj));
 }
 
 function getState(url, cFunction) {
@@ -198,33 +279,18 @@ function getState(url, cFunction) {
             cFunction(this);
         }
     };
-    xhttp.open("POST", url, false);
+    xhttp.open("GET", url, false);
     xhttp.send();
 }
 
 function responseGet(xhttp) {
-    gamestate = JSON.parse(xhttp.responseText)
-
-    if (myGamePiece.id == '') {
-        myGamePiece.id = 'ply' + gamestate.players.length;
-        gamestate.players.push(myGamePiece)
+    server = JSON.parse(xhttp.responseText);
+    id = server.players.map((el) => { return el.id }).indexOf(myGamePiece.id);
+    if(id != -1){
+        myGamePiece = server.players[id];
     }
-
-    states.update_state(gamestate);
 }
 
-function sendState(url, cFunction) {
-    var xhttp;
-    xhttp = new XMLHttpRequest();
-    xhttp.onreadystatechange = function() {
-        if (this.readyState == 4 && this.status == 200) {
-            cFunction(this);
-        }
-    };
-    xhttp.open("POST", url, false);
-    xhttp.setRequestHeader("Content-type", "application/json");
-    xhttp.send(JSON.stringify(gamestate));
-}
 
 function doNothing() {}
 
@@ -237,7 +303,6 @@ function mapGamePiece(gamepiece, newData) {
 }
 
 function mapPlayers(state) {
-
     players = state.filter(el => el.id != myGamePiece.id).map((el) => {
         return new component(el.width, el.height, "gray", el.x, el.y);
     });
@@ -245,18 +310,15 @@ function mapPlayers(state) {
     return players
 }
 function removeMe(motivo){
-    getState(geturl, responseGet);
-    const current_state = states.state[states.state.length - 1];
-    current_state.players.splice(myGamePiece, 1);
-    states.update_state(current_state);
-    sendState(sendurl, doNothing);
-    getState(geturl, responseGet);
-    
+    myGamePiece.removed = true;
+    sendState(sendStateUrl, responseGet, myGamePiece);
+        
     clearInterval(myGameArea.interval);
     myGameArea.clear();
     myGameArea.frameNo += 1;
 
     maze.forEach((el) => { el.update() });
+
     alert(motivo);
 }
 
