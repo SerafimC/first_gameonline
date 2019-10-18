@@ -2,19 +2,11 @@ var myGamePiece;
 var mousedown = -1;
 var gameServer = {}
 var maze = []
-<<<<<<< HEAD
 var port;
 var geturl;
 var sendurl;
 var updateurl;
 var sendStateUrl;
-=======
-var ajax = new XMLHttpRequest();
-var origin = '5000'
-var destiny = '5000'
-var geturl = 'http://localhost:' + origin + '/getstate'
-var sendurl = 'http://localhost:' + destiny + '/sendstate'
->>>>>>> 290ebd8b9205312b45dcc5bee6bb9f0cbeed59e1
 var devMode = false;
 
 var server = new Server();
