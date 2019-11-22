@@ -1,6 +1,5 @@
 var myGamePiece;
 var mousedown = -1;
-var gameServer = {}
 var maze = []
 var port;
 var geturl;
@@ -11,31 +10,31 @@ var devMode = false;
 
 var server = new Server();
 
-function printServer(server){
+function printServer(server) {
     console.log(" ");
     console.log("------ SERVER STATUS --------");
     console.log("Others  : " + JSON.stringify(server.others));
     console.log("Players Online : " + server.players.length);
-    if(server.players!=null)
-    {
-        server.players.forEach((player) => { 
+    if (server.players != null) {
+        server.players.forEach((player) => {
             console.log("------ ----------- --------");
-            console.log(player.type + " : " + player.id) 
+            console.log(player.type + " : " + player.id)
             console.log("------ estados player --------");
-            player.states.forEach((el) => { 
-                console.log("     " + el.id + " -> " + el.action + " - " + " x: "+el.x + " y: "+el.y + " heigth: "+el.height+ " width: "+el.width);
+            player.states.forEach((el) => {
+                console.log("     " + el.id + " -> " + el.action + " - " + " x: " + el.x + " y: " + el.y + " heigth: " + el.height + " width: " + el.width);
             });
         });
     }
     console.log("------ ----------- --------");
 }
-function printPlayer(player){
+
+function printPlayer(player) {
     console.log("------ ----------- --------");
-            console.log(player.type + " : " + player.id) 
-            console.log("------ estados player --------");
-            player.states.forEach((el) => { 
-                console.log("     " + el.id + " -> " + el.action + " - " + " x: "+el.x + " y: "+el.y + " heigth: "+el.height+ " width: "+el.width);
-            });
+    console.log(player.type + " : " + player.id)
+    console.log("------ estados player --------");
+    player.states.forEach((el) => {
+        console.log("     " + el.id + " -> " + el.action + " - " + " x: " + el.x + " y: " + el.y + " heigth: " + el.height + " width: " + el.width);
+    });
 }
 
 var myGameArea = {
@@ -52,16 +51,17 @@ var myGameArea = {
         this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
     }
 }
+
 function startGame() {
     port = window.location.port;
-    geturl = 'http://localhost:'+port+'/getstate';
-    sendurl = 'http://localhost:'+port+'/sendstate';
-    updateurl = 'http://localhost:'+port+'/updateplayer';
-    sendStateUrl = 'http://localhost:'+port+'/sendmystate';
+    geturl = 'http://localhost:' + port + '/getstate';
+    sendurl = 'http://localhost:' + port + '/sendstate';
+    updateurl = 'http://localhost:' + port + '/updateplayer';
+    sendStateUrl = 'http://localhost:' + port + '/sendmystate';
 
     // cria novo player
     myGamePiece = new Player(20, 20, "red", 20, 120);
-            
+
     // envia status do player novo
     sendState(sendStateUrl, responseGet, myGamePiece);
 
@@ -74,9 +74,9 @@ function genLabyrinth() {
     new component(10, 100, "blue", 100, 0).update();
 }
 
-function updatePlayer(obj){
+function updatePlayer(obj) {
     ctx = myGameArea.context;
-    if(obj.id != myGamePiece.id)
+    if (obj.id != myGamePiece.id)
         obj.color = "black";
     if (obj.type == "text") {
         ctx.font = obj.width + " " + obj.height;
@@ -87,30 +87,31 @@ function updatePlayer(obj){
         ctx.fillRect(obj.x, obj.y, obj.width, obj.height);
     }
 }
-function crashPlayer(otherobj){
+
+function crashPlayer(otherobj) {
     var myleft = myGamePiece.x;
-        var myright = myGamePiece.x + (myGamePiece.width);
-        var mytop = myGamePiece.y;
-        var mybottom = myGamePiece.y + (myGamePiece.height);
-        var otherleft = otherobj.x;
-        var otherright = otherobj.x + (otherobj.width);
-        var othertop = otherobj.y;
-        var otherbottom = otherobj.y + (otherobj.height);
-        var crash = true;
-        if ((mybottom < othertop) || (mytop > otherbottom) || (myright < otherleft) || (myleft > otherright)) {
-            crash = false;
-        }
-        // teste se está no ponto inicial não da conflito
-        if(((mybottom-21) >= 100) && ((mytop+21) <= 180) && ((myright-21) >= 13) && ((myleft-20) <= 83)){
-            crash = false;
-        }
-        // teste se está na safe-zone
-        if(((mybottom) > 100) && ((mytop) < 180) && ((myright) > 12) && ((myleft) < 80)){
-            myGamePiece.safe = true;
-        }else{
-            myGamePiece.safe = false;
-        }
-        return crash;
+    var myright = myGamePiece.x + (myGamePiece.width);
+    var mytop = myGamePiece.y;
+    var mybottom = myGamePiece.y + (myGamePiece.height);
+    var otherleft = otherobj.x;
+    var otherright = otherobj.x + (otherobj.width);
+    var othertop = otherobj.y;
+    var otherbottom = otherobj.y + (otherobj.height);
+    var crash = true;
+    if ((mybottom < othertop) || (mytop > otherbottom) || (myright < otherleft) || (myleft > otherright)) {
+        crash = false;
+    }
+    // teste se está no ponto inicial não da conflito
+    if (((mybottom - 21) >= 100) && ((mytop + 21) <= 180) && ((myright - 21) >= 13) && ((myleft - 20) <= 83)) {
+        crash = false;
+    }
+    // teste se está na safe-zone
+    if (((mybottom) > 100) && ((mytop) < 180) && ((myright) > 12) && ((myleft) < 80)) {
+        myGamePiece.safe = true;
+    } else {
+        myGamePiece.safe = false;
+    }
+    return crash;
 }
 
 function component(width, height, color, x, y, type) {
@@ -139,82 +140,47 @@ function component(width, height, color, x, y, type) {
             ctx.fillRect(this.x, this.y, this.width, this.height);
         }
     }
-    this.hitBottom = function() {
-        var rockbottom = myGameArea.canvas.height - this.height;
-        if (this.y > rockbottom) {
-            this.y = rockbottom;
-        }
-    }
-    this.crashWith = function(otherobj) {
-        var myleft = this.x;
-        var myright = this.x + (this.width);
-        var mytop = this.y;
-        var mybottom = this.y + (this.height);
-        var otherleft = otherobj.x;
-        var otherright = otherobj.x + (otherobj.width);
-        var othertop = otherobj.y;
-        var otherbottom = otherobj.y + (otherobj.height);
-        var crash = true;
-        if ((mybottom < othertop) || (mytop > otherbottom) || (myright < otherleft) || (myleft > otherright)) {
-            crash = false;
-        }
-        // teste se está no ponto inicial não da conflito
-        if (((mybottom - 21) >= 100) && ((mytop + 21) <= 180) && ((myright - 21) >= 13) && ((myleft - 20) <= 83)) {
-            crash = false;
-        }
-        // teste se está na safe-zone
-        if (((mybottom) > 100) && ((mytop) < 180) && ((myright) > 12) && ((myleft) < 80)) {
-            this.safe = true;
-        } else {
-            this.safe = false;
-        }
-
-        return crash;
-    }
 }
 
 function updateGameArea() {
-    getState(geturl, responseGet); 
+    getState(geturl, responseGet);
 
-    //printServer(server);
+    // printServer(server);
 
     myGameArea.clear();
     myGameArea.frameNo += 1;
 
     maze.forEach((el) => { el.update() });
-    
+
     id = server.players.map((el) => { return el.id }).indexOf(myGamePiece.id);
 
-    if(id != -1){
-        const player = server.players[id];        
-    
+    if (id != -1) {
+        const player = server.players[id];
+
         mapGamePiece(myGamePiece, player);
         updatePlayer(myGamePiece);
-    
+
         server.players.forEach((el) => { updatePlayer(el) });
-    
+
         // se ficar inativo por 1000 laços desconecta 
-        if(myGamePiece.inativity > 2000){
+        if (myGamePiece.inativity > 2000) {
             removeMe("Removido por inatividade.");
         }
     }
 
     //myGamePiece.inativity += 1;
     //console.log("myInativity: " + myGamePiece.inativity);
-    sendState(updateurl, responseGet, myGamePiece); 
+    sendState(updateurl, responseGet, myGamePiece);
 }
 
 document.addEventListener('keypress', (event) => {
-    //if(myGamePiece.safe)
-    //    console.log("safe-zone");
-    //else
-    //    console.log("unsafe-zone");
+
     myGamePiece.inativity = 0;
 
     if (event.keyCode == '97') {
         myGamePiece.x += myGamePiece.speed * -1;
-        if (crashPlayer(server.players) || crashPlayer(maze)) {
-           myGamePiece.x -= myGamePiece.speed * -1;
+        if (crash(myGamePiece, maze)) {
+            myGamePiece.x -= myGamePiece.speed * -1;
         } else {
             update_gamestate()
         }
@@ -222,26 +188,26 @@ document.addEventListener('keypress', (event) => {
 
     if (event.keyCode == '100') {
         myGamePiece.x += myGamePiece.speed;
-        if (crashPlayer(server.players) || crashPlayer(maze)) {
-           myGamePiece.x -= myGamePiece.speed;
+        if (crash(myGamePiece, maze)) {
+            myGamePiece.x -= myGamePiece.speed;
         } else {
             update_gamestate()
         }
     }
 
     if (event.keyCode == '119') {
-       myGamePiece.y += myGamePiece.speed * -1;
-       if (crashPlayer(server.players) || crashPlayer(maze)) {
-           myGamePiece.y -= myGamePiece.speed * -1;
-       } else {
+        myGamePiece.y += myGamePiece.speed * -1;
+        if (crash(myGamePiece, maze)) {
+            myGamePiece.y -= myGamePiece.speed * -1;
+        } else {
             update_gamestate()
-       }
+        }
     }
 
     if (event.keyCode == '115') {
         myGamePiece.y += myGamePiece.speed;
-        if (crashPlayer(server.players) || crashPlayer(maze)) {
-           myGamePiece.y -= myGamePiece.speed;
+        if (crash(myGamePiece, maze)) {
+            myGamePiece.y -= myGamePiece.speed;
         } else {
             update_gamestate()
         }
@@ -250,7 +216,7 @@ document.addEventListener('keypress', (event) => {
 });
 
 function update_gamestate() {
-    var state = new State((myGamePiece.state_id+1), "UPDATE", myGamePiece);
+    var state = new State((myGamePiece.state_id + 1), "UPDATE", myGamePiece);
     myGamePiece.states.push(state);
     myGamePiece.state_id++;
 
@@ -260,6 +226,7 @@ function update_gamestate() {
     sendState(sendStateUrl, responseGet, myGamePiece);
     //server.merge_states(server.players);        
 }
+
 function sendState(url, cFunction, obj) {
     var xhttp;
     xhttp = new XMLHttpRequest();
@@ -288,8 +255,9 @@ function getState(url, cFunction) {
 function responseGet(xhttp) {
     server = JSON.parse(xhttp.responseText);
     id = server.players.map((el) => { return el.id }).indexOf(myGamePiece.id);
-    if(id != -1){
-        myGamePiece = server.players[id];
+    if (id != -1) {
+        newData = server.players[id];
+        myGamePiece.update(newData.id, newData.safe, newData.type, newData.width, newData.height);
     }
 }
 
@@ -311,10 +279,11 @@ function mapPlayers(state) {
 
     return players
 }
-function removeMe(motivo){
+
+function removeMe(motivo) {
     myGamePiece.removed = true;
     sendState(sendStateUrl, responseGet, myGamePiece);
-        
+
     clearInterval(myGameArea.interval);
     myGameArea.clear();
     myGameArea.frameNo += 1;
@@ -438,5 +407,5 @@ function createMaze() {
     maze.push(new component(30, 60, 'blue', 600, 736));
     maze.push(new component(30, 130, 'blue', 560, 808));
     maze.push(new component(30, 130, 'blue', 624, 860));
-    maze.push(new component(70, 80, "green", 13, 100));
+    // maze.push(new component(70, 80, "green", 13, 100));
 }

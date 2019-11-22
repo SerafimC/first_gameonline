@@ -1,8 +1,8 @@
 class State {
-    constructor(id, action, player){
+    constructor(id, action, player) {
         this.id = id;
         this.action = action;
-        
+
         this.width = player.width;
         this.height = player.height;
         this.x = player.x;
