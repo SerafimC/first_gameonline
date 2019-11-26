@@ -24,49 +24,84 @@ app.post('/sendstate', function(req, res) {
     res.status(200).send("Sucesso!");
 });
 app.post('/merge_status', function(req, res) {  
-    var otherServer =  req.body;   
-    if(devMode){
-        console.log("Fazendo merge dos servidores!");
-        console.log("this > ", server);
-        console.log("------------------------------");
-        console.log("otherServer > ", otherServer);
-        console.log("------------------------------");
-    }
     if(JSON.stringify(req.body) != "{}"){
         var other = req.body;
-        if(other.others.length > server.others.length)
-            server.others = other.others;
-        for (let i = 0; i < other.players.length; i++) {
-            index = server.players.map((el) => { return el.id }).indexOf(other.players[i].id);
-            if(index != null && index >= 0){
-                var id_state = parseInt(server.players[index].states[server.players[index].states.length-1].id);
-                var id_state_other = parseInt(other.players[i].states[other.players[i].states.length-1].id);
-                //console.log('id_state > ', id_state);
-                //console.log('id_state_other > ', id_state_other);
-                if(id_state < id_state_other){
-                    server.players[index].states = other.players[i].states;
-                }
-                //console.log('server.players[index].states.length > ', server.players[index].states.length);
-                //console.log('other.players[i].states.length > ', other.players[i].states.length);
-            }else{
-                if(server.players!=null){
-                    server.players.push(other.players[i]);
-                }else{
-                    server.players = Array(0);
-                    server.players.push(other.players[i]);
-                }          
-                //mergeServers();
+        var MD5 = function(d){result = M(V(Y(X(d),8*d.length)));return result.toLowerCase()};function M(d){for(var _,m="0123456789ABCDEF",f="",r=0;r<d.length;r++)_=d.charCodeAt(r),f+=m.charAt(_>>>4&15)+m.charAt(15&_);return f}function X(d){for(var _=Array(d.length>>2),m=0;m<_.length;m++)_[m]=0;for(m=0;m<8*d.length;m+=8)_[m>>5]|=(255&d.charCodeAt(m/8))<<m%32;return _}function V(d){for(var _="",m=0;m<32*d.length;m+=8)_+=String.fromCharCode(d[m>>5]>>>m%32&255);return _}function Y(d,_){d[_>>5]|=128<<_%32,d[14+(_+64>>>9<<4)]=_;for(var m=1732584193,f=-271733879,r=-1732584194,i=271733878,n=0;n<d.length;n+=16){var h=m,t=f,g=r,e=i;f=md5_ii(f=md5_ii(f=md5_ii(f=md5_ii(f=md5_hh(f=md5_hh(f=md5_hh(f=md5_hh(f=md5_gg(f=md5_gg(f=md5_gg(f=md5_gg(f=md5_ff(f=md5_ff(f=md5_ff(f=md5_ff(f,r=md5_ff(r,i=md5_ff(i,m=md5_ff(m,f,r,i,d[n+0],7,-680876936),f,r,d[n+1],12,-389564586),m,f,d[n+2],17,606105819),i,m,d[n+3],22,-1044525330),r=md5_ff(r,i=md5_ff(i,m=md5_ff(m,f,r,i,d[n+4],7,-176418897),f,r,d[n+5],12,1200080426),m,f,d[n+6],17,-1473231341),i,m,d[n+7],22,-45705983),r=md5_ff(r,i=md5_ff(i,m=md5_ff(m,f,r,i,d[n+8],7,1770035416),f,r,d[n+9],12,-1958414417),m,f,d[n+10],17,-42063),i,m,d[n+11],22,-1990404162),r=md5_ff(r,i=md5_ff(i,m=md5_ff(m,f,r,i,d[n+12],7,1804603682),f,r,d[n+13],12,-40341101),m,f,d[n+14],17,-1502002290),i,m,d[n+15],22,1236535329),r=md5_gg(r,i=md5_gg(i,m=md5_gg(m,f,r,i,d[n+1],5,-165796510),f,r,d[n+6],9,-1069501632),m,f,d[n+11],14,643717713),i,m,d[n+0],20,-373897302),r=md5_gg(r,i=md5_gg(i,m=md5_gg(m,f,r,i,d[n+5],5,-701558691),f,r,d[n+10],9,38016083),m,f,d[n+15],14,-660478335),i,m,d[n+4],20,-405537848),r=md5_gg(r,i=md5_gg(i,m=md5_gg(m,f,r,i,d[n+9],5,568446438),f,r,d[n+14],9,-1019803690),m,f,d[n+3],14,-187363961),i,m,d[n+8],20,1163531501),r=md5_gg(r,i=md5_gg(i,m=md5_gg(m,f,r,i,d[n+13],5,-1444681467),f,r,d[n+2],9,-51403784),m,f,d[n+7],14,1735328473),i,m,d[n+12],20,-1926607734),r=md5_hh(r,i=md5_hh(i,m=md5_hh(m,f,r,i,d[n+5],4,-378558),f,r,d[n+8],11,-2022574463),m,f,d[n+11],16,1839030562),i,m,d[n+14],23,-35309556),r=md5_hh(r,i=md5_hh(i,m=md5_hh(m,f,r,i,d[n+1],4,-1530992060),f,r,d[n+4],11,1272893353),m,f,d[n+7],16,-155497632),i,m,d[n+10],23,-1094730640),r=md5_hh(r,i=md5_hh(i,m=md5_hh(m,f,r,i,d[n+13],4,681279174),f,r,d[n+0],11,-358537222),m,f,d[n+3],16,-722521979),i,m,d[n+6],23,76029189),r=md5_hh(r,i=md5_hh(i,m=md5_hh(m,f,r,i,d[n+9],4,-640364487),f,r,d[n+12],11,-421815835),m,f,d[n+15],16,530742520),i,m,d[n+2],23,-995338651),r=md5_ii(r,i=md5_ii(i,m=md5_ii(m,f,r,i,d[n+0],6,-198630844),f,r,d[n+7],10,1126891415),m,f,d[n+14],15,-1416354905),i,m,d[n+5],21,-57434055),r=md5_ii(r,i=md5_ii(i,m=md5_ii(m,f,r,i,d[n+12],6,1700485571),f,r,d[n+3],10,-1894986606),m,f,d[n+10],15,-1051523),i,m,d[n+1],21,-2054922799),r=md5_ii(r,i=md5_ii(i,m=md5_ii(m,f,r,i,d[n+8],6,1873313359),f,r,d[n+15],10,-30611744),m,f,d[n+6],15,-1560198380),i,m,d[n+13],21,1309151649),r=md5_ii(r,i=md5_ii(i,m=md5_ii(m,f,r,i,d[n+4],6,-145523070),f,r,d[n+11],10,-1120210379),m,f,d[n+2],15,718787259),i,m,d[n+9],21,-343485551),m=safe_add(m,h),f=safe_add(f,t),r=safe_add(r,g),i=safe_add(i,e)}return Array(m,f,r,i)}function md5_cmn(d,_,m,f,r,i){return safe_add(bit_rol(safe_add(safe_add(_,d),safe_add(f,i)),r),m)}function md5_ff(d,_,m,f,r,i,n){return md5_cmn(_&m|~_&f,d,_,r,i,n)}function md5_gg(d,_,m,f,r,i,n){return md5_cmn(_&f|m&~f,d,_,r,i,n)}function md5_hh(d,_,m,f,r,i,n){return md5_cmn(_^m^f,d,_,r,i,n)}function md5_ii(d,_,m,f,r,i,n){return md5_cmn(m^(_|~f),d,_,r,i,n)}function safe_add(d,_){var m=(65535&d)+(65535&_);return(d>>16)+(_>>16)+(m>>16)<<16|65535&m}function bit_rol(d,_){return d<<_|d>>>32-_}
+        var hashServer = MD5(JSON.stringify(server));
+        var hashOther = MD5(JSON.stringify(other));
+        if(hashServer == hashOther){
+            //console.log("hash iguais");
+            res.status(200).send(other);
+        }else{
+            //console.log("hash diferente");
+            if(devMode){
+                console.log("Fazendo merge dos servidores!");
+                console.log("this > ", server);
+                console.log("------------------------------");
+                console.log("otherServer > ", other);
+                console.log("------------------------------");
             }
+            if(other != null){
+                // analisa a lista de servidores do server recebido
+                for(let i=0; i < other.others.length ; i++){
+                    index = server.others.map((el) => { return el }).indexOf(other.others[i]);
+                    if(index == null || index < 0){
+                        if(server.others != null){
+                            server.others.push(other.others[i]);
+                        }else{
+                            server.others = Array(0);
+                            server.others.push(other.others[i]);
+                        }          
+                        printServerStatus();
+                    }
+                }
+                for (let i = 0; i < other.players.length; i++) {
+                    // busca o indice no server local do player (other.players[i])
+                    index = server.players.map((el) => { return el.id }).indexOf(other.players[i].id);
+                    // se achou verifica os estados
+                    if(index != null && index >= 0)
+                    {
+                        var id_state = parseInt(server.players[index].state_id);
+                        var id_state_other = parseInt(other.players[i].state_id);
+                        
+                        if(id_state < id_state_other){
+                            if(devMode){
+                                console.log('player local: ' + server.players[index].id);
+                                console.log('id_state > ', id_state);
+                                console.log('id_state_other > ', id_state_other);
+        
+                                console.log("estado LOCAL desatualizado. >> atualizando...");
+                            }
+                            server.players[index].states = other.players[i].states;
+                        }
+                    }
+                    // se não achar adiciona o player ao server local
+                    else
+                    {
+                        if(!other.players[i].removed){
+                            console.log("não achou o player > adicionando player");
+                            if(server.players!=null){
+                                server.players.push(other.players[i]);
+                            }else{
+                                server.players = Array(0);
+                                server.players.push(other.players[i]);
+                            }          
+                            printServerStatus();
+                        }
+                        //mergeServers();
+                    }
+                }
+            }
+            if(devMode){
+                printServerStatus();
+                console.log("Merge feito!");
+                console.log("this > ", server);
+                console.log("------------------------------");
+                console.log("otherServer > ", otherServer);
+                console.log("------------------------------");
+            }
+            res.status(200).send(server);
         }
-        if(devMode){
-            printServerStatus();
-            console.log("Merge feito!");
-            console.log("this > ", server);
-            console.log("------------------------------");
-            console.log("otherServer > ", otherServer);
-            console.log("------------------------------");
-        }
-        res.status(200).send(server);
     }else{
         res.status(404).send("Não chegou nada aqui.");
     }
@@ -141,10 +176,11 @@ function getPeers(){
 function listen(port){
     server.others.push(port);
     const server_listen = app.listen(port);
-    console.log('Server running on port ' + port);
-    console.log('Server others : ' + JSON.stringify(server.others));
     
-    this.interval = setInterval(mergeServers, 5000);
+    console.log("SERVER ONLINE");
+    printServerStatus();
+
+    this.interval = setInterval(mergeServers, 100);
 }
 function mergeServers()
 {
@@ -152,27 +188,56 @@ function mergeServers()
         if(server.others[i] != port_){
             var mergesUrl = 'http://localhost:' + server.others[i] + '/merge_status';
             if(devMode)
-                console.log('Tentando merge em :  ' + mergesUrl);
+                console.log("["+port_+"] Tentando merge em :  " + mergesUrl);
             var xhttp = new XMLHttpRequest();
             xhttp.onreadystatechange = function() {
-                if (this.readyState == 4 && this.status == 200) { 
-                    server = JSON.parse(this.responseText); 
-                    if(devMode){
-                        console.log("Deu boa o merge.");        
-                        console.log("this > ", server);
-                        console.log("------------------------------");             
-                    }
-                    
-                    printServerStatus();
-                }else{     
-                    if(this.statusText!=null && this.statusText.code === "ECONNREFUSED"){
+                if(this.readyState == 4)
+                {
+                    if (this.status == 200) { 
+                        server = JSON.parse(this.responseText);      
+                        if(devMode){
+                            console.log("Deu boa o merge.");        
+                            console.log("this > ", server);
+                            console.log("readyState : "+ this.readyState);
+                            console.log("------------------------------");             
+                            printServerStatus();
+                        } 
+                    }              
+                    else{  
+                        if(this.statusText!= null && this.statusText.code == 'ECONNREFUSED'){
+                            if(this.statusText.port == server.others[i]){
+                                console.log("["+port_+"] Conexão recusada em : "+ this.statusText.port + " removendo da lista..");
+                                server.others.splice(i, 1);
+                                
+                                printServerStatus();
+                            }                            
+                        }else{
+                            console.log("readyState : "+ this.readyState);
+                            console.log("status : "+ this.status);
+                            console.log("Deu ruim o merge. Erro: " + JSON.stringify(this));
+                        }
                         
-                    }else{
-                        console.log("Deu ruim o merge. Erro: " + this.responseText);
                     }
-                }
+                }else{
+                    if(devMode){
+                        switch(this.readyState){
+                            case 0: 
+                            console.log("request not initialized");
+                            break;
+                            case 1: 
+                            console.log("server connection established");
+                            break;
+                            case 2: 
+                            console.log("request received");
+                            break;
+                            case 3: 
+                            console.log("processing request");
+                            break;
+                        }
+                    }
+                }              
             };           
-            xhttp.open("POST", mergesUrl, false);
+            xhttp.open("POST", mergesUrl, true);
             xhttp.setRequestHeader("Content-Type", "application/json");
             xhttp.send(JSON.stringify(server));
         }
@@ -193,28 +258,33 @@ function addPlayer(player){
     }
 
     if(devMode)
-        printServerStatus(); 
-    //printAttPlayer(player);
-    //mergeServers();
+        printAttPlayer(player);
+    printServerStatus();
 }
-function updatePlayer(player, index){    
+function updatePlayer(player, index){  
+    var state = new st.State((player.state_id+1), "UPDATE", player);
+    player.states.push(state);
+    player.state_id++;  
     server.players[index] = player;
+
+    
     //printAttPlayer(player); 
-    //mergeServers();
 }
 function removePlayer(player){
+    console.log("removendo player -> "+ player.id);
     player.state_id++;
     var state = new st.State((player.state_id), "REMOVE", player);
     player.states.push(state);
     
-
-    server.players.splice(player, 1);
+    index = server.players.map((el) => { return el.id }).indexOf(player.id);
+    server.players[index] = player;
+    //server.players.splice(player, 1);
 
     //mergeServers();
 
-    printAttPlayer(player);   
-    if(devMode)
-        printServerStatus();
+    printServerStatus();
+    //if(devMode)
+    //printAttPlayer(player); 
 }
 
 function printAttPlayer(player){
@@ -234,7 +304,12 @@ function printServerStatus(){
     console.log("Players Online : " + server.players.length);
     if(server.players!=null)
     {
-       server.players.forEach((el) => { console.log(el.type + " : " + el.id) });
+       server.players.forEach((el) => { 
+            if(!el.removed)
+                console.log(el.type + " : " + el.id) 
+            else
+                console.log(el.type + " : " + el.id + " -> [REMOVED]") 
+        });
     }
     console.log("------ ----------- --------");
 }
