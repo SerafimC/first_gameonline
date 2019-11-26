@@ -10,6 +10,7 @@ class Player {
         this.state_id = 0;
         this.color = color;
         this.removed = false;
+        this.removedStatus = "";
         this.x = x;
         this.y = y;
         this.states = Array(0);

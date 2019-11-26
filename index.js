@@ -114,6 +114,7 @@ app.post('/updateplayer', function(req, res) {
 });
 app.post('/sendmystate', function(req, res){
     var player =  req.body;
+    player.inativity = 0;
     if(player.removed){
         removePlayer(player);
     }else{
@@ -181,6 +182,20 @@ function listen(port){
     printServerStatus();
 
     this.interval = setInterval(mergeServers, 100);
+    this.inativityInterval = setInterval(inativity, 1000);
+}
+function inativity()
+{
+    for (let i = 0; i < server.players.length; i++) 
+    {
+        server.players[i].inativity += 1;
+        if(server.players[i].inativity > 30 && !server.players[i].removed)
+        {
+            server.players[i].removed = true;
+            server.players[i].removedStatus = "INATIVIDADE";
+            removePlayer(server.players[i]);
+        }
+    } 
 }
 function mergeServers()
 {
@@ -271,13 +286,15 @@ function updatePlayer(player, index){
     //printAttPlayer(player); 
 }
 function removePlayer(player){
-    console.log("removendo player -> "+ player.id);
+    console.log("Removendo Player -> "+ player.id + " MOTIVO: "+player.removedStatus);
     player.state_id++;
     var state = new st.State((player.state_id), "REMOVE", player);
     player.states.push(state);
     
     index = server.players.map((el) => { return el.id }).indexOf(player.id);
     server.players[index] = player;
+    
+    // remove de fato o player
     //server.players.splice(player, 1);
 
     //mergeServers();

@@ -161,25 +161,20 @@ function updateGameArea() {
     if(id != -1){
         const player = server.players[id];        
     
-        mapGamePiece(myGamePiece, player);
-        updatePlayer(myGamePiece);
-    
-        server.players.forEach((el) => { updatePlayer(el) });
-    
-        // se ficar inativo por 2000 laços desconecta 
-        if(myGamePiece.inativity > 2000){
-            removeMe("Removido por inatividade.");
+        if(player.removed){
+            clearInterval(myGameArea.interval);
+            alert("Você foi removido, MOTIVO: "+player.removedStatus);
+        }else{
+            mapGamePiece(myGamePiece, player);
+            updatePlayer(myGamePiece);
+        
+            server.players.forEach((el) => { updatePlayer(el) });
         }
     }
-
-    myGamePiece.inativity += 1;
-    console.log("myInativity: " + myGamePiece.inativity);
     sendState(updateurl, responseGet, myGamePiece); 
 }
 
 document.addEventListener('keypress', (event) => {
-    myGamePiece.inativity = 0;
-
     if (event.keyCode == '97') {
         myGamePiece.x += myGamePiece.speed * -1;
         if (crash(maze) || crash(server.players)) {
@@ -221,8 +216,7 @@ function update_gamestate() {
     id = server.players.map((el) => { return el.id }).indexOf(myGamePiece.id);
     server.players[id] = myGamePiece;
 
-    sendState(sendStateUrl, responseGet, myGamePiece);
-    //server.merge_states(server.players);        
+    sendState(sendStateUrl, responseGet, myGamePiece); 
 }
 function sendState(url, cFunction, obj) {
     var xhttp;
@@ -274,18 +268,6 @@ function mapPlayers(state) {
     });
 
     return players
-}
-function removeMe(motivo){
-    myGamePiece.removed = true;
-    sendState(sendStateUrl, responseGet, myGamePiece);
-        
-    clearInterval(myGameArea.interval);
-    myGameArea.clear();
-    myGameArea.frameNo += 1;
-
-    maze.forEach((el) => { el.update() });
-
-    alert(motivo);
 }
 function crash(objects) {
     for (i = 0; i < objects.length; i += 1) {
